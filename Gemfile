@@ -53,3 +53,6 @@ group :development do
   gem 'spring'
 end
 
+# Http Client
+gem "faraday"
+gem "faraday_middleware"
