@@ -43,9 +43,16 @@ class WebhookController < ApplicationController
       config.proxy          = ENV['LINE_OUTBOUND_PROXY']
     end
     if !image_url.empty?
-      client.send_image(to_mid: from_mid, image_url: image_url, preview_url: preview_url)
+      client.send_image(
+        [from_mid],
+        originalContentUrl: image_url,
+        previewImageUrl: preview_url
+      )
     else
-      client.send_text([from_mid], text: "not found")
+      client.send_text(
+        [from_mid],
+        text: "not found"
+      )
     end
 
     if res.status == 200
