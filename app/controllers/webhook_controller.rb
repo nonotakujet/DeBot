@@ -39,7 +39,7 @@ class WebhookController < ApplicationController
       config.channel_mid    = ENV['LINE_CHANNEL_MID']
       config.proxy          = ENV['LINE_OUTBOUND_PROXY']
     end
-    res = client.send_text([from_mid], text_message)
+    res = client.send_text([from_mid], text: text_message)
 
     if res.status == 200
       logger.info({success: res})
