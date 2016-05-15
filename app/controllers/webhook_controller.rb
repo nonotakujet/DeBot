@@ -1,10 +1,8 @@
+require 'line/bot/client'
+
 class WebhookController < ApplicationController
   protect_from_forgery except: :callback # CSRF対策無効化
 
-  CHANNEL_ID = ENV['LINE_CHANNEL_ID']
-  CHANNEL_SECRET = ENV['LINE_CHANNEL_SECRET']
-  CHANNEL_MID = ENV['LINE_CHANNEL_MID']
-  OUTBOUND_PROXY = ENV['LINE_OUTBOUND_PROXY']
 
   def callback
     unless is_validate_signature
@@ -35,8 +33,13 @@ class WebhookController < ApplicationController
     text_message = result['content']['text']
     from_mid =result['content']['from']
 
-    client = LineClient.new(CHANNEL_ID, CHANNEL_SECRET, CHANNEL_MID, OUTBOUND_PROXY)
-    res = client.send([from_mid], text_message)
+    client = Line::Bot::Client.new do |config|
+      config.channel_id     = ENV['LINE_CHANNEL_ID']
+      config.channel_secret = ENV['LINE_CHANNEL_SECRET']
+      config.channel_mid    = ENV['LINE_CHANNEL_MID']
+      config.proxy          = ENV['LINE_OUTBOUND_PROXY']
+    end
+    res = client.send_text([from_mid], text_message)
 
     if res.status == 200
       logger.info({success: res})
