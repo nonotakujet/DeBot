@@ -30,8 +30,11 @@ class WebhookController < ApplicationController
 
     result = params[:result][0]
     logger.info({from_line: result})
-    text_message = result['content']['text']
+    input_message = result['content']['text']
     from_mid =result['content']['from']
+
+    google_custom_api = DeBot::GoogleCustomApi.new
+    image_url, preview_url = google_custom_api.search_image(input_message)
 
     client = Line::Bot::Client.new do |config|
       config.channel_id     = ENV['LINE_CHANNEL_ID']
@@ -39,7 +42,11 @@ class WebhookController < ApplicationController
       config.channel_mid    = ENV['LINE_CHANNEL_MID']
       config.proxy          = ENV['LINE_OUTBOUND_PROXY']
     end
-    res = client.send_text([from_mid], text: text_message)
+    if !image_url.empty?
+      client.send_image(to_mid: from_mid, image_url: image_url, preview_url: preview_url)
+    else
+      client.send_text([from_mid], text: "not found")
+    end
 
     if res.status == 200
       logger.info({success: res})
